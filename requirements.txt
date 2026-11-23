@@ -1,0 +1,5 @@
+Django==5.2.19
+djangorestframework==3.18.3
+PyYAML==6.0.3
+requests==2.34.2
+django-rest-passwordreset==1.6.0

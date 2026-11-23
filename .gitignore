@@ -1,0 +1,36 @@
+# Виртуальные окружения
+.venv/
+venv/
+env/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+
+# Локальная конфигурация и база данных
+.env
+.env.*
+/AUDIT.md
+*.sqlite3
+*.sqlite3-*
+*.db
+*.log
+media/
+staticfiles/
+
+# Кеши и временные файлы
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+*.swp
+*.swo
+*~
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
