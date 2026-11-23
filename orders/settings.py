@@ -3,6 +3,8 @@
 import os
 from pathlib import Path
 
+from django.core.exceptions import ImproperlyConfigured
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
@@ -109,8 +111,40 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # Собственная модель пользователя с авторизацией по email.
 AUTH_USER_MODEL = 'backend.User'
 
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-DEFAULT_FROM_EMAIL = 'noreply@example.com'
+
+def _email_flag(name):
+    value = os.environ.get(name, 'false').strip().lower()
+    if value in ('true', '1'):
+        return True
+    if value in ('false', '0'):
+        return False
+    raise ImproperlyConfigured(f'{name}: укажите true, false, 1 или 0.')
+
+
+EMAIL_BACKEND = os.environ.get(
+    'EMAIL_BACKEND', 'django.core.mail.backends.console.EmailBackend',
+)
+if EMAIL_BACKEND == 'django.core.mail.backends.smtp.EmailBackend':
+    EMAIL_HOST = os.environ.get('EMAIL_HOST', 'localhost')
+    try:
+        EMAIL_PORT = int(os.environ.get('EMAIL_PORT', '25'))
+    except ValueError:
+        raise ImproperlyConfigured(
+            'EMAIL_PORT должен быть целым числом.',
+        ) from None
+    if not 1 <= EMAIL_PORT <= 65535:
+        raise ImproperlyConfigured('EMAIL_PORT должен быть от 1 до 65535.')
+
+    EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', '')
+    EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
+    EMAIL_USE_TLS = _email_flag('EMAIL_USE_TLS')
+    EMAIL_USE_SSL = _email_flag('EMAIL_USE_SSL')
+    if EMAIL_USE_TLS and EMAIL_USE_SSL:
+        raise ImproperlyConfigured(
+            'EMAIL_USE_TLS и EMAIL_USE_SSL нельзя включать одновременно.',
+        )
+
+DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'noreply@example.com')
 ADMIN_EMAIL = os.environ.get('ADMIN_EMAIL', '')
 ADMINS = [('Администратор', ADMIN_EMAIL)] if ADMIN_EMAIL else []
 
